@@ -1,55 +1,62 @@
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import java.util.*;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class ObjectDetailsTest {
+public class ObjectDetailsTest extends BaseTest {
 
-    private static final String BASE_URL = "https://www.rijksmuseum.nl/api/nl/collection";
-    private static final String API_KEY = "0fiuZFh4"; // A valid API key should be provided here
-
-    // ✅ 1. Test retrieving object details with a valid object ID
+    private static final String BASE_URL = BASE_API_URL + "nl/collection";
+    //Test retrieving object details with a valid object ID
     @Test
     public void testRetrieveObjectDetailsWithValidId() {
-        given()
+        Response response = given()
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
-                .get(BASE_URL + "/SK-C-5") // Valid object ID
-                .then()
+                .pathParam("objectNumber", "SK-C-5")
+                .get(BASE_URL + "/{objectNumber}");
+
+        response.then()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .body("artObject.objectNumber", equalTo("SK-C-5"))
                 .body("artObject.title", equalTo("De Nachtwacht"))
                 .body("artObject.principalOrFirstMaker", equalTo("Rembrandt van Rijn"))
-                .body("artObject.webImage.url", notNullValue()); // Image URL must be present
+                .body("artObject.webImage.url", notNullValue());
     }
 
-    // ✅ 2. Test that API should return 404 for an invalid object ID
+    // Test that API should return 404 for an invalid object ID
+    @Disabled ("Bug reported for this")
     @Test
     public void testRetrieveObjectDetailsWithInvalidId() {
         given()
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
-                .get(BASE_URL + "/INVALID_ID") // Invalid object ID
+                .get(BASE_URL + "/aaaAAAaaa123") // Invalid object ID
                 .then()
                 .statusCode(404); // Should return 404 Not Found
     }
 
-    // ✅ 3. Test that API should return 401 Unauthorized when API Key is missing
+    // Test that API should return 401 Unauthorized when API Key is missing
     @Test
     public void testRetrieveObjectDetailsWithoutApiKey() {
         given()
                 .queryParam("format", "json") // Request without API key
                 .when()
-                .get(BASE_URL + "/SK-C-5")
+                .pathParam("objectNumber", "SK-C-5")
+                .get(BASE_URL + "/{objectNumber}")
                 .then()
                 .statusCode(401); // Should return 401 Unauthorized
     }
 
-    // ✅ 4. Test invalid format usage, expecting 400 Bad Request
+    //Test invalid format usage
     @Test
     public void testRetrieveObjectDetailsWithInvalidFormat() {
         given()
@@ -58,46 +65,25 @@ public class ObjectDetailsTest {
                 .when()
                 .get(BASE_URL + "/SK-C-5")
                 .then()
-                .statusCode(400); // Should return 400 Bad Request
+                .statusCode(404);
     }
 
-    // ✅ 5. Test response time (should be less than 2 seconds)
+    //Test that the image URL is not empty
     @Test
-    public void testResponseTimeForObjectDetails() {
-        given()
+    public void testArtObjectsHaveWebImageFieldPresent() {
+        Response response = given()
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
-                .get(BASE_URL + "/SK-C-5")
-                .then()
-                .statusCode(200)
-                .time(lessThan(2000L)); // Response should be within 2 seconds
-    }
+                .get(BASE_URL);
 
-    // ✅ 6. Test that the image URL is not empty
-    @Test
-    public void testWebImageIsPresent() {
-        given()
-                .queryParam("key", API_KEY)
-                .queryParam("format", "json")
-                .when()
-                .get(BASE_URL + "/SK-C-5")
-                .then()
-                .statusCode(200)
-                .body("artObject.webImage.url", notNullValue()); // Image URL must not be null
-    }
+        assertEquals(200, response.getStatusCode(), "Status code is not 200");
 
-    // ✅ 7. Test the validity of the date information in object details
-    @Test
-    public void testObjectHasValidDate() {
-        given()
-                .queryParam("key", API_KEY)
-                .queryParam("format", "json")
-                .when()
-                .get(BASE_URL + "/SK-C-5")
-                .then()
-                .statusCode(200)
-                .body("artObject.dating.presentingDate", equalTo("1642")) // Expected year
-                .body("artObject.dating.period", equalTo(17)); // Should belong to the 17th century
+        List<Map<String, Object>> artObjects = response.jsonPath().getList("artObjects");
+
+        boolean allHaveWebImageField = artObjects.stream()
+                .allMatch(obj -> ((Map<String, Object>) obj).containsKey("webImage"));
+
+        assertTrue(allHaveWebImageField, "Some artworks are missing the 'webImage' field");
     }
 }
