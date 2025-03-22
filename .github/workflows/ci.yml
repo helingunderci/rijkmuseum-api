@@ -2,18 +2,14 @@ name: API Tests CI
 
 on:
   push:
-    branches:
-      - master
+    branches: [ "main", "master" ]
   pull_request:
-    branches:
-      - master
+    branches: [ "main", "master" ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      API_KEY: ${{ secrets.API_KEY }}
-      BASE_API_URL: ${{ secrets.BASE_API_URL }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -36,5 +32,5 @@ jobs:
       - name: Upload HTML report as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: test-report
+          name: surefire-report
           path: target/site/surefire-report.html
