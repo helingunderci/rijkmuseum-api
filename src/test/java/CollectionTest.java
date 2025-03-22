@@ -1,120 +1,178 @@
+import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CollectionTest {
 
-    private static final String BASE_URL = "https://www.rijksmuseum.nl/api/en/collection";
+    private static final String BASE_API_URL = "https://www.rijksmuseum.nl/api/";
     private static final String API_KEY = "0fiuZFh4";
 
-    //API returns 200 OK and contains artworks (non-empty collection)
+    // Test that the API returns 200 OK and the collection is not empty
     @Test
     public void testApiReturnsSuccessResponse() {
         given()
+                .baseUri(BASE_API_URL + "en/collection")
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
-                .get(BASE_URL)
+                .get()
                 .then()
                 .statusCode(200)
-                .body("count", greaterThan(0)); // Check that the collection is not empty
+                .body("count", greaterThan(0));
     }
 
-    //Test if the API response is in JSON format
+    // Test that the API response is in JSON format
     @Test
     public void testApiReturnsJsonFormat() {
         given()
+                .baseUri(BASE_API_URL + "en/collection")
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
-                .get(BASE_URL)
+                .get()
                 .then()
                 .statusCode(200)
-                .contentType("application/json"); // Is the response in JSON format?
+                .contentType("application/json");
     }
 
-    //Test collection retrieval using culture = 'nl'
+    // Test that the returned web URLs contain '/nl/' when culture=nl
     @Test
-    public void testRetrieveCollectionWithValidCultureNL() {
-        given()
+    public void testRetrieveCollectionWithCultureNl_WebUrlCheck() {
+        Response response = given()
+                .baseUri(BASE_API_URL + "nl/collection")
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
-                .queryParam("culture", "nl")
                 .when()
-                .get(BASE_URL)
-                .then()
-                .statusCode(200)
-                .body("artObjects.size()", greaterThan(0)); //Are there any objects in the collection?
+                .get();
+
+        assertEquals(200, response.statusCode(), "Response status code is not 200!");
+
+        List<String> webUrls = response.jsonPath().getList("artObjects.links.web");
+        boolean allContainNl = webUrls.stream().allMatch(url -> url.contains("/nl/"));
+        assertTrue(allContainNl, "Some URLs do not contain '/nl/' as expected for culture=nl");
+
+        System.out.println("Web URLs returned with culture=nl:");
+        webUrls.forEach(System.out::println);
     }
 
-    //Test collection retrieval using culture = 'en'
+    // Test that the returned web URLs contain '/en/' when culture=en
     @Test
-    public void testRetrieveCollectionWithValidCultureEN() {
-        given()
+    public void testRetrieveCollectionWithCultureEn() {
+        Response response = given()
+                .baseUri(BASE_API_URL + "en/collection")
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
-                .queryParam("culture", "en")
                 .when()
-                .get(BASE_URL)
-                .then()
-                .statusCode(200)
-                .body("artObjects.size()", greaterThan(0)); // Are there any objects in the collection?
+                .get();
+
+        assertEquals(200, response.statusCode(), "Response status code is not 200!");
+
+        List<String> webUrls = response.jsonPath().getList("artObjects.links.web");
+        boolean allContainEn = webUrls.stream().allMatch(url -> url.contains("/en/"));
+        assertTrue(allContainEn, "Some URLs do not contain '/en/' as expected for culture=en");
+
+        System.out.println("Web URLs returned with culture=en:");
+        webUrls.forEach(System.out::println);
     }
 
-    //Test collection retrieval with page size = 8
+    // Test retrieving a collection with page size = 8
     @Test
     public void testRetrieveCollectionWithValidPsParameter() {
         given()
+                .baseUri(BASE_API_URL + "en/collection")
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .queryParam("ps", "8")
                 .when()
-                .get(BASE_URL)
+                .get()
                 .then()
                 .statusCode(200)
-                .body("artObjects.size()", equalTo(8)); // 5 objects should return
+                .body("artObjects.size()", equalTo(8));
     }
 
-    //Test sorting collection by 'relevance'
+    // Test sorting the collection by relevance
     @Test
     public void testRetrieveCollectionWithSortingByRelevance() {
-        given()
+        Response response = given()
+                .baseUri(BASE_API_URL + "en/collection")
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
-                .queryParam("s", "relevance") // Sort by relevans
+                .queryParam("s", "relevance")
                 .when()
-                .get(BASE_URL)
-                .then()
-                .statusCode(200)
-                .body("artObjects.size()", greaterThan(0)); // List should not be empty
+                .get();
+
+        response.prettyPrint();
+        assertEquals(200, response.getStatusCode(), "Expected status code 200");
+        List<Map<String, Object>> artObjects = response.jsonPath().getList("artObjects");
+        assertNotNull(artObjects, "artObjects list is null");
+        assertFalse(artObjects.isEmpty(), "artObjects list is empty");
+
+        System.out.println("Number of artworks returned: " + artObjects.size());
+        System.out.println("First artwork title: " + artObjects.get(0).get("title"));
     }
 
-    //Test sorting collection by 'objecttype'
+    // Test that the facet "type" exists and is not empty
     @Test
-    public void testRetrieveCollectionWithSortingByObjectType() {
-        given()
+    public void testRetrieveCollectionFacetTypeExistsAndNotEmpty() {
+        Response response = given()
+                .baseUri(BASE_API_URL + "en/collection")
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
-                .queryParam("s", "objecttype") // Sorting by object type
+                .queryParam("s", "objecttype")
                 .when()
-                .get(BASE_URL)
+                .get()
                 .then()
                 .statusCode(200)
-                .body("artObjects.size()", greaterThan(0)); // List should be emty
+                .extract().response();
+
+        List<Map<String, Object>> facets = response.jsonPath().getList("facets");
+        List<String> actualTypes = new ArrayList<>();
+
+        for (Map<String, Object> facet : facets) {
+            if ("type".equals(facet.get("name"))) {
+                List<Map<String, Object>> typeFacets = (List<Map<String, Object>>) facet.get("facets");
+                for (Map<String, Object> typeFacet : typeFacets) {
+                    actualTypes.add((String) typeFacet.get("key"));
+                }
+                break;
+            }
+        }
+
+        System.out.println("Type facet list (unsorted):");
+        actualTypes.forEach(System.out::println);
+
+        assertNotNull(actualTypes, "'type' facet list is null");
+        assertFalse(actualTypes.isEmpty(), "'type' facet list is empty");
     }
 
-    //Test filtering the collection by involved artist: Rembrandt van Rijn
+    // Test filtering the collection by involved maker: Rembrandt van Rijn
     @Test
     public void testRetrieveCollectionByInvolvedMaker() {
-        given()
+        Response response = given()
+                .baseUri(BASE_API_URL + "en/collection")
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
-                .queryParam("involvedMaker", "Rembrandt van Rijn") // Artist filter
+                .queryParam("involvedMaker", "Rembrandt van Rijn")
                 .when()
-                .get(BASE_URL)
-                .then()
-                .statusCode(200)
-                .body("artObjects.size()", greaterThan(0))
-                .body("artObjects[0].principalOrFirstMaker", equalTo("Rembrandt van Rijn")); // is first object Rembrant?
+                .get();
+
+        assertEquals(200, response.statusCode(), "Expected HTTP status 200");
+
+        List<String> makers = response.jsonPath().getList("artObjects.principalOrFirstMaker");
+        assertNotNull(makers);
+        assertFalse(makers.isEmpty(), "No artworks found for Rembrandt");
+
+        boolean allByRembrandt = makers.stream().allMatch(maker -> maker.equals("Rembrandt van Rijn"));
+        assertTrue(allByRembrandt, "Not all artworks are by Rembrandt van Rijn");
+
+        System.out.println("Found " + makers.size() + " artworks by Rembrandt van Rijn.");
     }
 }
