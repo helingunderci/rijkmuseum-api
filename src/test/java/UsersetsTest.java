@@ -1,7 +1,6 @@
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
@@ -118,12 +117,13 @@ public class UsersetsTest extends BaseTest {
         }
     }
 
-    @Disabled("Bug reported, test temporarily disabled")
     @Test
     public void testPageSizeLimitExceeds10000() {
         int page = 200;   // A high page number
         int pageSize = 100; // Maximum supported page size
         int calculatedLimit = page * pageSize;
+
+        assumeTrue(false, "Bug reported - temporarily disabled due to 10,000+ limit error");
 
         // Skip the test if calculated limit does not exceed 10,000
         assumeTrue(calculatedLimit > 10_000, "Test is skipped because the calculated limit does not exceed 10,000");

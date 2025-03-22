@@ -1,6 +1,5 @@
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -8,10 +7,12 @@ import java.util.*;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class ObjectDetailsTest extends BaseTest {
 
     private static final String BASE_URL = BASE_API_URL + "nl/collection";
+
     //Test retrieving object details with a valid object ID
     @Test
     public void testRetrieveObjectDetailsWithValidId() {
@@ -32,9 +33,10 @@ public class ObjectDetailsTest extends BaseTest {
     }
 
     // Test that API should return 404 for an invalid object ID
-    @Disabled ("Bug reported for this")
     @Test
     public void testRetrieveObjectDetailsWithInvalidId() {
+        assumeTrue(false, "Skipping due to known bug - Bug reported for this");
+
         given()
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")

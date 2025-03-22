@@ -1,5 +1,4 @@
 import io.restassured.response.Response;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -9,6 +8,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class CollectionTest extends BaseTest{
 
@@ -169,9 +169,11 @@ public class CollectionTest extends BaseTest{
         assertEquals(5, response.jsonPath().getList("artObjects").size());
     }
 
-    @Disabled ("Bug reported")
     @Test
     public void testCollectionWithInvalidPsParameter() {
+        // It has been skipped due to bug
+        assumeTrue(false, "Skipping due to known bug - Bug reported");
+
         given()
                 .baseUri(COLLECTION_URL)
                 .queryParam("key", API_KEY)
