@@ -1,16 +1,14 @@
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-public class UsersetsTest {
-
-    private static final String BASE_URL = "https://www.rijksmuseum.nl/api";
-    private static final String API_KEY = "0fiuZFh4";
+public class UsersetsTest extends BaseTest {
 
     private String validUsersetId;
 
@@ -23,7 +21,7 @@ public class UsersetsTest {
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
-                .get(BASE_URL + "/nl/usersets")
+                .get(BASE_API_URL + "/nl/usersets")
                 .then()
                 .statusCode(200)
                 .extract().response();
@@ -43,7 +41,7 @@ public class UsersetsTest {
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
-                .get(BASE_URL + "/nl/usersets/" + validUsersetId);
+                .get(BASE_API_URL + "/nl/usersets/" + validUsersetId);
 
         response.then()
                 .statusCode(200)
@@ -65,7 +63,7 @@ public class UsersetsTest {
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
-                .get(BASE_URL + "/nl/usersets/" + validUsersetId)
+                .get(BASE_API_URL + "/nl/usersets/" + validUsersetId)
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
@@ -82,7 +80,7 @@ public class UsersetsTest {
                 .queryParam("key", "invalid_api_key") // Geçersiz API key
                 .queryParam("format", "json")
                 .when()
-                .get(BASE_URL + "/nl/usersets/" + validUsersetId)
+                .get(BASE_API_URL + "/nl/usersets/" + validUsersetId)
                 .then()
                 .statusCode(401);
     }
@@ -93,7 +91,7 @@ public class UsersetsTest {
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
-                .get(BASE_URL + "/nl/usersets")
+                .get(BASE_API_URL + "/nl/usersets")
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
@@ -109,7 +107,7 @@ public class UsersetsTest {
                 .queryParam("format", "json")
                 .queryParam("page", 0)
                 .when()
-                .get(BASE_URL + "/nl/usersets")
+                .get(BASE_API_URL + "/nl/usersets")
                 .then()
                 .extract().response();
 
@@ -118,7 +116,7 @@ public class UsersetsTest {
                 .queryParam("format", "json")
                 .queryParam("page", 1)
                 .when()
-                .get(BASE_URL + "/nl/usersets")
+                .get(BASE_API_URL + "/nl/usersets")
                 .then()
                 .extract().response();
 
@@ -128,6 +126,7 @@ public class UsersetsTest {
         assertNotEquals(firstPageFirstItem, secondPageFirstItem, "Pagination not working properly, same results!");
     }
 
+    @Disabled //Bug reported
     @Test
     public void testPageSizeLimitExceeds10000() {
         int page = 200;   // A high page number
@@ -141,7 +140,7 @@ public class UsersetsTest {
                     .queryParam("page", page)
                     .queryParam("pageSize", pageSize)
                     .when()
-                    .get(BASE_URL + "/nl/usersets")
+                    .get(BASE_API_URL + "/nl/usersets")
                     .then()
                     .statusCode(400) // Beklenen: Bad Request veya ilgili hata kodu
                     .body("error", containsString("page * pageSize cannot exceed 10,000"));

@@ -5,13 +5,10 @@ import org.junit.jupiter.api.Test;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-public class UsersetsDetailsTest {
-
-    private static final String BASE_URL = "https://www.rijksmuseum.nl/api";
-    private static final String API_KEY = "0fiuZFh4";
+public class UsersetsDetailsTest extends BaseTest {
 
     @Test
-    public void testUsersetDetailsReturns200AndValidJson() {
+    public void testUsersetDetailsReturnsValidJson() {
         RestAssured.useRelaxedHTTPSValidation(); // To avoid SSL errors
 
         //Valid user set ID
@@ -19,7 +16,7 @@ public class UsersetsDetailsTest {
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
-                .get(BASE_URL + "/nl/usersets")
+                .get(BASE_API_URL + "/nl/usersets")
                 .then()
                 .statusCode(200)
                 .extract().response();
@@ -30,7 +27,7 @@ public class UsersetsDetailsTest {
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
-                .get(BASE_URL + "/nl/usersets/" + validUsersetId);
+                .get(BASE_API_URL + "/nl/usersets/" + validUsersetId);
 
         detailResponse.then()
                 .statusCode(200)

@@ -10,10 +10,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CollectionTest {
-
-    private static final String BASE_API_URL = "https://www.rijksmuseum.nl/api/";
-    private static final String API_KEY = "0fiuZFh4";
+public class CollectionTest extends BaseTest{
 
     // Test that the API returns 200 OK and the collection is not empty
     @Test
