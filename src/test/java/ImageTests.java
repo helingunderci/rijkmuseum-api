@@ -13,7 +13,7 @@ public class ImageTests extends BaseTest {
                 .queryParam("key", API_KEY)
                 .pathParam("object-number", "SK-C-5")
                 .when()
-                .get(BASE_API_URL + "/en/collection/{object-number}/tiles")
+                .get(BASE_URL)
                 .then()
                 .statusCode(200);
     }

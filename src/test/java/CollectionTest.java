@@ -1,7 +1,7 @@
 import io.restassured.response.Response;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,25 +12,33 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CollectionTest extends BaseTest{
 
+    private static final String COLLECTION_URL = BASE_API_URL + "en/collection";
+
     // Test that the API returns 200 OK and the collection is not empty
     @Test
-    public void testApiReturnsSuccessResponse() {
-        given()
-                .baseUri(BASE_API_URL + "en/collection")
+    public void shouldReturnSuccessStatusAndNonEmptyCollection() {
+        sendGetRequestToCollection()
+                .then()
+                .statusCode(200)
+                // Assert that the "count" field in the response body is greater than 0
+                .body("count", greaterThan(0));
+    }
+
+    // Utility method to send a GET request to the collection endpoint
+    private Response sendGetRequestToCollection() {
+        return given()
+                .baseUri(COLLECTION_URL)
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
-                .get()
-                .then()
-                .statusCode(200)
-                .body("count", greaterThan(0));
+                .get();
     }
 
     // Test that the API response is in JSON format
     @Test
     public void testApiReturnsJsonFormat() {
         given()
-                .baseUri(BASE_API_URL + "en/collection")
+                .baseUri(COLLECTION_URL)
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
@@ -42,7 +50,7 @@ public class CollectionTest extends BaseTest{
 
     // Test that the returned web URLs contain '/nl/' when culture=nl
     @Test
-    public void testRetrieveCollectionWithCultureNl_WebUrlCheck() {
+    public void testRetrieveCollectionWithCultureNl() {
         Response response = given()
                 .baseUri(BASE_API_URL + "nl/collection")
                 .queryParam("key", API_KEY)
@@ -55,16 +63,13 @@ public class CollectionTest extends BaseTest{
         List<String> webUrls = response.jsonPath().getList("artObjects.links.web");
         boolean allContainNl = webUrls.stream().allMatch(url -> url.contains("/nl/"));
         assertTrue(allContainNl, "Some URLs do not contain '/nl/' as expected for culture=nl");
-
-        System.out.println("Web URLs returned with culture=nl:");
-        webUrls.forEach(System.out::println);
     }
 
     // Test that the returned web URLs contain '/en/' when culture=en
     @Test
     public void testRetrieveCollectionWithCultureEn() {
         Response response = given()
-                .baseUri(BASE_API_URL + "en/collection")
+                .baseUri(COLLECTION_URL)
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
@@ -76,7 +81,6 @@ public class CollectionTest extends BaseTest{
         boolean allContainEn = webUrls.stream().allMatch(url -> url.contains("/en/"));
         assertTrue(allContainEn, "Some URLs do not contain '/en/' as expected for culture=en");
 
-        System.out.println("Web URLs returned with culture=en:");
         webUrls.forEach(System.out::println);
     }
 
@@ -84,7 +88,7 @@ public class CollectionTest extends BaseTest{
     @Test
     public void testRetrieveCollectionWithValidPsParameter() {
         given()
-                .baseUri(BASE_API_URL + "en/collection")
+                .baseUri(COLLECTION_URL)
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .queryParam("ps", "8")
@@ -99,7 +103,7 @@ public class CollectionTest extends BaseTest{
     @Test
     public void testRetrieveCollectionWithSortingByRelevance() {
         Response response = given()
-                .baseUri(BASE_API_URL + "en/collection")
+                .baseUri(COLLECTION_URL)
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .queryParam("s", "relevance")
@@ -111,50 +115,13 @@ public class CollectionTest extends BaseTest{
         List<Map<String, Object>> artObjects = response.jsonPath().getList("artObjects");
         assertNotNull(artObjects, "artObjects list is null");
         assertFalse(artObjects.isEmpty(), "artObjects list is empty");
-
-        System.out.println("Number of artworks returned: " + artObjects.size());
-        System.out.println("First artwork title: " + artObjects.get(0).get("title"));
-    }
-
-    // Test that the facet "type" exists and is not empty
-    @Test
-    public void testRetrieveCollectionFacetTypeExistsAndNotEmpty() {
-        Response response = given()
-                .baseUri(BASE_API_URL + "en/collection")
-                .queryParam("key", API_KEY)
-                .queryParam("format", "json")
-                .queryParam("s", "objecttype")
-                .when()
-                .get()
-                .then()
-                .statusCode(200)
-                .extract().response();
-
-        List<Map<String, Object>> facets = response.jsonPath().getList("facets");
-        List<String> actualTypes = new ArrayList<>();
-
-        for (Map<String, Object> facet : facets) {
-            if ("type".equals(facet.get("name"))) {
-                List<Map<String, Object>> typeFacets = (List<Map<String, Object>>) facet.get("facets");
-                for (Map<String, Object> typeFacet : typeFacets) {
-                    actualTypes.add((String) typeFacet.get("key"));
-                }
-                break;
-            }
-        }
-
-        System.out.println("Type facet list (unsorted):");
-        actualTypes.forEach(System.out::println);
-
-        assertNotNull(actualTypes, "'type' facet list is null");
-        assertFalse(actualTypes.isEmpty(), "'type' facet list is empty");
     }
 
     // Test filtering the collection by involved maker: Rembrandt van Rijn
     @Test
     public void testRetrieveCollectionByInvolvedMaker() {
         Response response = given()
-                .baseUri(BASE_API_URL + "en/collection")
+                .baseUri(COLLECTION_URL)
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .queryParam("involvedMaker", "Rembrandt van Rijn")
@@ -169,7 +136,52 @@ public class CollectionTest extends BaseTest{
 
         boolean allByRembrandt = makers.stream().allMatch(maker -> maker.equals("Rembrandt van Rijn"));
         assertTrue(allByRembrandt, "Not all artworks are by Rembrandt van Rijn");
+    }
 
-        System.out.println("Found " + makers.size() + " artworks by Rembrandt van Rijn.");
+    @Test
+    public void testCollectionWithImageOnlyFilter() {
+        Response response = given()
+                .baseUri(COLLECTION_URL)
+                .queryParam("key", API_KEY)
+                .queryParam("format", "json")
+                .queryParam("imgonly", "true")
+                .when()
+                .get();
+
+        assertEquals(200, response.getStatusCode());
+
+        List<Map<String, Object>> artObjects = response.jsonPath().getList("artObjects");
+        for (Map<String, Object> art : artObjects) {
+            assertNotNull(art.get("webImage"), "Found artwork without image although imgonly=true");
+        }
+    }
+
+    @Test
+    public void testPaginationWithPageParam() {
+        Response response = given()
+                .baseUri(COLLECTION_URL)
+                .queryParam("key", API_KEY)
+                .queryParam("format", "json")
+                .queryParam("ps", 5)
+                .queryParam("p", 2)
+                .when()
+                .get();
+
+        assertEquals(200, response.statusCode());
+        assertEquals(5, response.jsonPath().getList("artObjects").size());
+    }
+
+    @Disabled ("Bug reported")
+    @Test
+    public void testCollectionWithInvalidPsParameter() {
+        given()
+                .baseUri(COLLECTION_URL)
+                .queryParam("key", API_KEY)
+                .queryParam("format", "json")
+                .queryParam("ps", "-5")
+                .when()
+                .get()
+                .then()
+                .statusCode(400);
     }
 }

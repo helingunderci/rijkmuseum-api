@@ -19,7 +19,8 @@ public class ObjectDetailsTest extends BaseTest {
                 .queryParam("key", API_KEY)
                 .queryParam("format", "json")
                 .when()
-                .get(BASE_URL + "/SK-C-5");
+                .pathParam("objectNumber", "SK-C-5")
+                .get(BASE_URL + "/{objectNumber}");
 
         response.then()
                 .statusCode(200)
@@ -28,12 +29,10 @@ public class ObjectDetailsTest extends BaseTest {
                 .body("artObject.title", equalTo("De Nachtwacht"))
                 .body("artObject.principalOrFirstMaker", equalTo("Rembrandt van Rijn"))
                 .body("artObject.webImage.url", notNullValue());
-
-        System.out.println(response.prettyPrint());
     }
 
     // Test that API should return 404 for an invalid object ID
-    @Disabled //Bug reported for this
+    @Disabled ("Bug reported for this")
     @Test
     public void testRetrieveObjectDetailsWithInvalidId() {
         given()
@@ -51,7 +50,8 @@ public class ObjectDetailsTest extends BaseTest {
         given()
                 .queryParam("format", "json") // Request without API key
                 .when()
-                .get(BASE_URL + "/SK-C-5")
+                .pathParam("objectNumber", "SK-C-5")
+                .get(BASE_URL + "/{objectNumber}")
                 .then()
                 .statusCode(401); // Should return 401 Unauthorized
     }
