@@ -29,3 +29,12 @@ jobs:
 
       - name: Run API tests
         run: mvn test -DAPI_KEY=${{ secrets.API_KEY }} -DBASE_API_URL=${{ secrets.BASE_API_URL }}
+
+      - name: Generate HTML report
+        run: mvn surefire-report:report
+
+      - name: Upload HTML report as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: target/site/surefire-report.html

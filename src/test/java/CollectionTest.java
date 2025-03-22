@@ -80,8 +80,6 @@ public class CollectionTest extends BaseTest{
         List<String> webUrls = response.jsonPath().getList("artObjects.links.web");
         boolean allContainEn = webUrls.stream().allMatch(url -> url.contains("/en/"));
         assertTrue(allContainEn, "Some URLs do not contain '/en/' as expected for culture=en");
-
-        webUrls.forEach(System.out::println);
     }
 
     // Test retrieving a collection with page size = 8
