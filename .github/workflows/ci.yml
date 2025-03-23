@@ -2,15 +2,14 @@ name: API Tests CI
 
 on:
   push:
-    branches:
-      - master
+    branches: [ "main", "master" ]
   pull_request:
-    branches:
-      - master
+    branches: [ "main", "master" ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -25,4 +24,13 @@ jobs:
         run: mvn install -DskipTests
 
       - name: Run API tests
-        run: mvn test
+        run: mvn test -DAPI_KEY=${{ secrets.API_KEY }} -DBASE_API_URL=${{ secrets.BASE_API_URL }}
+
+      - name: Generate HTML report
+        run: mvn surefire-report:report
+
+      - name: Upload HTML report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-report
+          path: target/site/surefire-report.html

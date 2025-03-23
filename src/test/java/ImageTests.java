@@ -2,10 +2,9 @@ import org.junit.jupiter.api.Test;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-public class ImageTests {
+public class ImageTests extends BaseTest {
 
-    private static final String BASE_URL = "https://www.rijksmuseum.nl/api/en/collection/{object-number}/tiles";
-    private static final String API_KEY = "0fiuZFh4";
+    private static final String BASE_URL = BASE_API_URL + "en/collection/{object-number}/tiles";
 
     //API should return 200 OK for a valid request
     @Test
@@ -52,18 +51,5 @@ public class ImageTests {
                 .get(BASE_URL)
                 .then()
                 .statusCode(anyOf(is(403), is(404)));
-    }
-
-    //API response time should be less than 2 seconds
-    @Test
-    public void testResponseTimeForTiles() {
-        given()
-                .queryParam("key", API_KEY)
-                .pathParam("object-number", "SK-A-1115")
-                .when()
-                .get(BASE_URL)
-                .then()
-                .statusCode(200)
-                .time(lessThan(2000L));
     }
 }

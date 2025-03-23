@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="CollectionTest" time="11.066" tests="10" errors="0" skipped="1" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="UsersetsDetailsTest" time="0.781" tests="4" errors="0" skipped="0" failures="0">
   <properties>
     <property name="gopherProxySet" value="false"/>
     <property name="awt.toolkit" value="sun.lwawt.macosx.LWCToolkit"/>
@@ -62,16 +62,8 @@
     <property name="java.class.version" value="55.0"/>
     <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
   </properties>
-  <testcase name="testRetrieveCollectionByInvolvedMaker" classname="CollectionTest" time="1.134"/>
-  <testcase name="testRetrieveCollectionWithSortingByRelevance" classname="CollectionTest" time="1.333"/>
-  <testcase name="testApiReturnsJsonFormat" classname="CollectionTest" time="1.103"/>
-  <testcase name="testRetrieveCollectionWithCultureEn" classname="CollectionTest" time="1.141"/>
-  <testcase name="testRetrieveCollectionWithCultureNl" classname="CollectionTest" time="1.316"/>
-  <testcase name="testCollectionWithInvalidPsParameter" classname="CollectionTest" time="0">
-    <skipped message="Bug reported"/>
-  </testcase>
-  <testcase name="testPaginationWithPageParam" classname="CollectionTest" time="1.354"/>
-  <testcase name="testCollectionWithImageOnlyFilter" classname="CollectionTest" time="1.107"/>
-  <testcase name="testRetrieveCollectionWithValidPsParameter" classname="CollectionTest" time="1.302"/>
-  <testcase name="shouldReturnSuccessStatusAndNonEmptyCollection" classname="CollectionTest" time="1.245"/>
+  <testcase name="testUsersetDetailsWithInvalidIdReturnsError" classname="UsersetsDetailsTest" time="0.137"/>
+  <testcase name="testUsersetDetailsReturnsValidJson" classname="UsersetsDetailsTest" time="0.36"/>
+  <testcase name="testUsersetDetailsWithoutApiKey" classname="UsersetsDetailsTest" time="0.069"/>
+  <testcase name="testUsersetsListIsNotEmpty" classname="UsersetsDetailsTest" time="0.214"/>
 </testsuite>
