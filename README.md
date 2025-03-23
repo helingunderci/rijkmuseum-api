@@ -1,4 +1,4 @@
-# Rest-Assured API Testing Project
+# Rijksmuseum API Tests
 
 ### Description
 This project is designed to validate the functionality of RESTful APIs using **Rest-Assured**, a popular Java library for API test automation. The project includes various test cases to ensure the reliability, correctness, and robustness of the API endpoints.
