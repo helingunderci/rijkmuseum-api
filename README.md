@@ -1,5 +1,18 @@
 # Rijksmuseum API Tests
 
+## Assignment Context
+
+This project is part of a technical assignment.  
+The goal was to test Rijksmuseum’s public REST API using Rest-Assured, create a CI/CD pipeline, generate test reports, and report bugs.
+
+### GitHub Actions Workflow:
+- CI pipeline runs on every push and PR
+- Generates HTML test reports via Maven Surefire plugin
+- Uploads the reports as artifacts for inspection
+
+**Submission Branch:** `rijkmuseum-api-tests`  
+**Test Coverage:** Collection, Object Details, Usersets, and Image endpoints
+
 ### Description
 This project is designed to validate the functionality of RESTful APIs using **Rest-Assured**, a popular Java library for API test automation. The project includes various test cases to ensure the reliability, correctness, and robustness of the API endpoints.
 
